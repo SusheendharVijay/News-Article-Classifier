@@ -1,0 +1,2 @@
+- Get different apis and integrate them
+- Connect them to mongodb (use this for reference: https://github.com/dpauk/kafka-mongo)

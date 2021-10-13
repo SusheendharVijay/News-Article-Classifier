@@ -48,6 +48,7 @@ def main():
             producer.produce(topic=topic, key=p_key,
                              value=payload, callback=acked)
             producer.flush()
+            time.sleep(10)
         except TypeError:
             sys.exit()
 

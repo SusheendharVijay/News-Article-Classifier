@@ -16,13 +16,13 @@ def msg_process(msg):
 
     try:
         dmsg = json.loads(msg.value())
-        print(dmsg["articles"][0]['description'])
+        print(dmsg["description"])
     except:
         print("Empty data received")
         return
     try:
         conn = MongoClient('mongodb://root:example@localhost:27017', 27017)
-        print("connected sucessfully")
+        # print("connected sucessfully")
     except:
         print("could not connect to mongodb")
         return
@@ -43,8 +43,8 @@ def msg_process(msg):
     # rec_id2 = users.insert_one(emp_rec2)
     # print("Data inserted with record ids", rec_id1, " ", rec_id2)
     news_rec = {
-        "source": dmsg["articles"][0]['source'],
-        "description": dmsg["articles"][0]['description'],
+        "source": dmsg['source'],
+        "description": dmsg['description'],
     }
     rec_id = users.insert_one(news_rec)
     print("record entered with rec_id:", rec_id)

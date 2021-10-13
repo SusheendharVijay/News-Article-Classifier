@@ -22,6 +22,8 @@ def acked(err, msg):
 
 
 def main():
+    counter = 0
+    current_article_count = None
     parser = argparse.ArgumentParser(description=__doc__)
     # parser.add_argument('filename', type=str,
     # help='Time series csv file.')
@@ -43,12 +45,27 @@ def main():
             newsapi = NewsApiClient(api_key='4ddbf382b16c4184a33bdd8453be9a42')
 
             news = newsapi.get_top_headlines()
-            print("streaming news")
-            payload = json.dumps(news)
+            article_count = len(news["articles"])
+            if current_article_count == None:
+                current_article_count = article_count
+            elif article_count != current_article_count:
+                counter = 0
+                current_article_count = article_count
+            else:
+                counter += 1
+
+            if counter == current_article_count:
+                print("No more articles, returning...")
+                return
+
+            articles = news["articles"]
+            print("stats - counter:{}, current_article_count:{}, api article_count:{}".format(counter,
+                                                                                              current_article_count, article_count))
+            payload = json.dumps(articles[counter])
             producer.produce(topic=topic, key=p_key,
                              value=payload, callback=acked)
             producer.flush()
-            time.sleep(10)
+
         except TypeError:
             sys.exit()
 

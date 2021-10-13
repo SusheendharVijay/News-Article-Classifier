@@ -42,7 +42,7 @@ def main():
         try:
             newsapi = NewsApiClient(api_key='4ddbf382b16c4184a33bdd8453be9a42')
 
-            news = newsapi.get_top_headlines(q='bitcoin')
+            news = newsapi.get_top_headlines()
             print("streaming news")
             payload = json.dumps(news)
             producer.produce(topic=topic, key=p_key,

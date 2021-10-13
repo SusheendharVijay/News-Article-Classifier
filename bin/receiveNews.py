@@ -13,7 +13,10 @@ from confluent_kafka import Consumer, KafkaError, KafkaException
 
 def msg_process(msg):
     dmsg = json.loads(msg.value())
-    print(dmsg["articles"][0]['description'])
+    try:
+        print(dmsg["articles"][0]['description'])
+    except:
+        print("Empty data received")
 
 
 def main():

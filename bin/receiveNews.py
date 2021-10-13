@@ -13,13 +13,19 @@ from pymongo import MongoClient
 
 
 def msg_process(msg):
-    if msg == None:
+
+    try:
+        dmsg = json.loads(msg.value())
+        print(dmsg["articles"][0]['description'])
+    except:
+        print("Empty data received")
         return
     try:
         conn = MongoClient('mongodb://root:example@localhost:27017', 27017)
         print("connected sucessfully")
     except:
         print("could not connect to mongodb")
+        return
 
     db = conn.database
     users = db.users
@@ -36,20 +42,12 @@ def msg_process(msg):
     # rec_id1 = users.insert_one(emp_rec1)
     # rec_id2 = users.insert_one(emp_rec2)
     # print("Data inserted with record ids", rec_id1, " ", rec_id2)
-
-    dmsg = json.loads(msg.value())
-<<<<<<< Updated upstream
-    try:
-        print(dmsg["articles"][0]['description'])
-    except:
-        print("Empty data received")
-=======
-    data = {
-        "desc": dmsg["articles"][0]['description']
+    news_rec = {
+        "source": dmsg["articles"][0]['source'],
+        "description": dmsg["articles"][0]['description'],
     }
-    rec_id = users.insert_one(data)
-    print("Data inserted with record ids", rec_id)
->>>>>>> Stashed changes
+    rec_id = users.insert_one(news_rec)
+    print("record entered with rec_id:", rec_id)
 
 
 def main():

@@ -45,6 +45,8 @@ def msg_process(msg):
     news_rec = {
         "source": dmsg['source'],
         "description": dmsg['description'],
+        "title": dmsg["title"],
+        "category": dmsg["category"]
     }
     rec_id = users.insert_one(news_rec)
     print("record entered with rec_id:", rec_id)

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-"""Generates a stream to Kafka from a time series csv file.
-"""
 
 import argparse
 import csv
@@ -13,6 +11,8 @@ import socket
 from newsapi import NewsApiClient
 import http.client
 import urllib.parse
+
+offset = 0
 
 
 def acked(err, msg):
@@ -69,7 +69,7 @@ def main():
 
             # mediastack news
             data = get_mediastack()
-            time.sleep(20)
+            time.sleep(120)
             for article in data:
                 payload = {
                     'title': article["title"],
@@ -88,14 +88,14 @@ def main():
 
 
 def get_mediastack():
-
+    global offset
     conn = http.client.HTTPConnection('api.mediastack.com')
     params = urllib.parse.urlencode({
         'access_key': 'db473f12969c8297f6a4453ca4ebd5d5',
         # 'categories': '-general,-sports,-bussiness,-entertainment,-health,-science,-technology',
         'sort': 'published_desc',
         'language': "en",
-        'limit': 1,
+        'limit': 30,
     })
 
     conn.request('GET', '/v1/news?{}'.format(params))
@@ -103,6 +103,7 @@ def get_mediastack():
     res = conn.getresponse()
     data = res.read().decode("utf-8")
     data = json.loads(data)
+
     return data["data"]
 
 

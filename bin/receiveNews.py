@@ -11,6 +11,7 @@ import socket
 from confluent_kafka import Consumer, KafkaError, KafkaException
 from pymongo import MongoClient
 
+  
 
 def msg_process(msg):
 

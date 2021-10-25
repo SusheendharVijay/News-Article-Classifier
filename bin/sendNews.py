@@ -95,7 +95,7 @@ def get_mediastack():
         # 'categories': '-general,-sports,-bussiness,-entertainment,-health,-science,-technology',
         'sort': 'published_desc',
         'language': "en",
-        'limit': 30,
+        'limit': 100,
     })
 
     conn.request('GET', '/v1/news?{}'.format(params))

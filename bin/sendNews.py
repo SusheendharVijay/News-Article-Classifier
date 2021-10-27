@@ -69,7 +69,7 @@ def main():
 
             # mediastack news
             data = get_mediastack()
-            time.sleep(120)
+            time.sleep(10)  # temp change
             for article in data:
                 payload = {
                     'title': article["title"],
@@ -83,8 +83,11 @@ def main():
 
             producer.flush()
 
-        except TypeError:
-            sys.exit()
+        except Exception as e:
+            if e == TypeError:
+                sys.exit()
+            else:
+                print(e)
 
 
 def get_mediastack():
@@ -94,7 +97,7 @@ def get_mediastack():
         'access_key': 'db473f12969c8297f6a4453ca4ebd5d5',
         # 'categories': '-general,-sports,-bussiness,-entertainment,-health,-science,-technology',
         'sort': 'published_desc',
-        'language': "en",
+        'language': "en,-ar,-de,-es,-fr,-he,-it,-nl,-no,-pt,-ru,-se,-zh",
         'limit': 100,
     })
 
@@ -104,7 +107,11 @@ def get_mediastack():
     data = res.read().decode("utf-8")
     data = json.loads(data)
 
-    return data["data"]
+    articles = data["data"]
+    articles = list(
+        filter(
+            lambda article: True if article["language"] == 'en' else False, articles))
+    return articles
 
 
 if __name__ == "__main__":

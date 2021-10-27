@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np  # linear algebra
-import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn
 import os
@@ -35,23 +35,23 @@ def convert_data_to_csv():
         doc_id = doc["_id"]
         series_obj = pd.Series(doc, name=doc_id)
         docs = docs.append(series_obj)
-
+    docs.drop_duplicates(subset="_id")
     docs.to_csv("news_data.csv", ",")
     csv_export = docs.to_csv(sep=",")
-    print("\nCSV data:***********************", csv_export)
-    data = pd.read_csv("news_data.csv", sep='\t')
-    df = pd.read_csv("Train.csv")
-    df.head()
+    #print("\nCSV data:***********************", csv_export)
+    df = pd.read_csv("TrainData.csv")
+    df.fillna(0)
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     df['category_id'] = df['Category'].factorize()[0]
     category_id_df = df[['Category', 'category_id']].drop_duplicates().sort_values('category_id')
     category_to_id = dict(category_id_df.values)
     id_to_category = dict(category_id_df[['category_id', 'Category']].values)
-    print(id_to_category)
+    print(df)
     df.groupby('Category').category_id.count()
     tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2', encoding='latin-1', ngram_range=(1, 2),
                             stop_words='english')
 
-    features = tfidf.fit_transform(df.Text).toarray()
+    features = tfidf.fit_transform(df.Text.values.astype('U')).toarray()
 
     labels = df.category_id
     N = 3
@@ -117,7 +117,6 @@ def convert_data_to_csv():
             print("# '{}':".format(Category))
             print("  . Top unigrams:\n       . {}".format('\n       . '.join(unigrams)))
             print("  . Top bigrams:\n       . {}".format('\n       . '.join(bigrams)))
-            test_df = pd.read_csv("news_data.csv")
             test_features = tfidf.transform(docs.description.tolist())
 
             Y_pred = model.predict(test_features)
@@ -132,20 +131,6 @@ def convert_data_to_csv():
             })
             predictions.to_csv('predictions.csv', index=False)
             print(predictions)
-
-def predictCategory():
-    test_df = pd.read_csv("news_data.csv")
-    test_features = tfidf.transform(docs["description"].tolist())
-
-    Y_pred = model.predict(test_features)
-    print("predictions")
-    print(Y_pred)
-    predictions = pd.DataFrame({
-        "ArticleId": docs["_id"],
-        "Text":docs["description"],
-        "Category": Y_pred_name
-    })
-    predictions.to_csv('predictions.csv', index=False)
 
 
 if __name__ == "__main__":

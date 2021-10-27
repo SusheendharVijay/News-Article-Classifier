@@ -43,7 +43,8 @@ def convert_data_to_csv():
     df.fillna(0)
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     df['category_id'] = df['Category'].factorize()[0]
-    category_id_df = df[['Category', 'category_id']].drop_duplicates().sort_values('category_id')
+    category_id_df = df[['Category', 'category_id']
+                        ].drop_duplicates().sort_values('category_id')
     category_to_id = dict(category_id_df.values)
     id_to_category = dict(category_id_df[['category_id', 'Category']].values)
     print(df)
@@ -64,7 +65,8 @@ def convert_data_to_csv():
         print("# '{}':".format(Category))
         print("  . Most correlated unigrams:\n       . {}".format(
             '\n       . '.join(unigrams[-N:])))
-        print("  . Most correlated bigrams:\n       . {}".format('\n       . '.join(bigrams[-N:])))
+        print("  . Most correlated bigrams:\n       . {}".format(
+            '\n       . '.join(bigrams[-N:])))
         print("features_chi2")
         print(features_chi2)
         SAMPLE_SIZE = int(len(features) * 0.3)
@@ -77,9 +79,11 @@ def convert_data_to_csv():
         my_id = 0
         print(projected_features[(labels[indices] == my_id).values])
         for category, category_id in sorted(category_to_id.items()):
-            points = projected_features[(labels[indices] == category_id).values]
+            points = projected_features[(
+                labels[indices] == category_id).values]
         models = [
-            RandomForestClassifier(n_estimators=200, max_depth=100, random_state=0),
+            RandomForestClassifier(
+                n_estimators=200, max_depth=100, random_state=0),
             MultinomialNB(),
             LogisticRegression(random_state=30),
         ]
@@ -88,10 +92,12 @@ def convert_data_to_csv():
         entries = []
         for model in models:
             model_name = model.__class__.__name__
-            accuracies = cross_val_score(model, features, labels, scoring='accuracy', cv=CV)
+            accuracies = cross_val_score(
+                model, features, labels, scoring='accuracy', cv=CV)
             for fold_idx, accuracy in enumerate(accuracies):
                 entries.append((model_name, fold_idx, accuracy))
-            cv_df = pd.DataFrame(entries, columns=['model_name', 'fold_idx', 'accuracy'])
+            cv_df = pd.DataFrame(
+                entries, columns=['model_name', 'fold_idx', 'accuracy'])
         print("accuracy")
         print(cv_df.groupby('model_name').accuracy.mean())
         model = LogisticRegression(random_state=0)
@@ -110,18 +116,23 @@ def convert_data_to_csv():
 
         N = 5
         for Category, category_id in sorted(category_to_id.items()):
-            indices = np.argsort(model.coef_[category_id])  # This time using the model co-eficients / weights
+            # This time using the model co-eficients / weights
+            indices = np.argsort(model.coef_[category_id])
             feature_names = np.array(tfidf.get_feature_names())[indices]
-            unigrams = [v for v in reversed(feature_names) if len(v.split(' ')) == 1][:N]
-            bigrams = [v for v in reversed(feature_names) if len(v.split(' ')) == 2][:N]
+            unigrams = [v for v in reversed(
+                feature_names) if len(v.split(' ')) == 1][:N]
+            bigrams = [v for v in reversed(
+                feature_names) if len(v.split(' ')) == 2][:N]
             print("# '{}':".format(Category))
-            print("  . Top unigrams:\n       . {}".format('\n       . '.join(unigrams)))
-            print("  . Top bigrams:\n       . {}".format('\n       . '.join(bigrams)))
+            print("  . Top unigrams:\n       . {}".format(
+                '\n       . '.join(unigrams)))
+            print("  . Top bigrams:\n       . {}".format(
+                '\n       . '.join(bigrams)))
             test_features = tfidf.transform(docs.description.tolist())
 
             Y_pred = model.predict(test_features)
             print("predictions")
-            Y_pred_category=[]
+            Y_pred_category = []
             for cat in Y_pred:
                 Y_pred_category = id_to_category[cat]
             predictions = pd.DataFrame({
@@ -135,3 +146,13 @@ def convert_data_to_csv():
 
 if __name__ == "__main__":
     convert_data_to_csv()
+
+
+def retrain():
+    # get data from api
+    # clean it
+    # retrain the model with partial fit
+    # save the model locally
+
+
+def predict():

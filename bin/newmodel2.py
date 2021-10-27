@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import sklearn
+import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
@@ -28,7 +29,6 @@ def convert_data_to_csv():
     users = db.users
     cursor = users.find()
     mongo_docs = list(cursor)
-    # print(mongo_docs)
     docs = pd.DataFrame(columns=[])
     for num, doc in enumerate(mongo_docs):
         doc["_id"] = str(doc["_id"])
@@ -38,22 +38,23 @@ def convert_data_to_csv():
     docs.drop_duplicates(subset="_id")
     docs.to_csv("news_data.csv", ",")
     csv_export = docs.to_csv(sep=",")
-    #print("\nCSV data:***********************", csv_export)
-    df = pd.read_csv("TrainData.csv")
+    return docs
+
+def trainModel():
+    df = pd.read_csv("combined.csv")
     df.fillna(0)
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    df['category_id'] = df['Category'].factorize()[0]
-    category_id_df = df[['Category', 'category_id']
+    df['category_id'] = df['category'].factorize()[0]
+    category_id_df = df[['category', 'category_id']
                         ].drop_duplicates().sort_values('category_id')
     category_to_id = dict(category_id_df.values)
-    id_to_category = dict(category_id_df[['category_id', 'Category']].values)
-    print(df)
-    df.groupby('Category').category_id.count()
+    id_to_category = dict(category_id_df[['category_id', 'category']].values)
+    df.groupby('category').category_id.count()
     tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2', encoding='latin-1', ngram_range=(1, 2),
                             stop_words='english')
 
-    features = tfidf.fit_transform(df.Text.values.astype('U')).toarray()
-
+    features = tfidf.fit_transform(df.description.values.astype('U')).toarray()
+    model = LogisticRegression(random_state=0)
     labels = df.category_id
     N = 3
     for Category, category_id in sorted(category_to_id.items()):
@@ -67,17 +68,14 @@ def convert_data_to_csv():
             '\n       . '.join(unigrams[-N:])))
         print("  . Most correlated bigrams:\n       . {}".format(
             '\n       . '.join(bigrams[-N:])))
-        print("features_chi2")
-        print(features_chi2)
         SAMPLE_SIZE = int(len(features) * 0.3)
         np.random.seed(0)
         indices = np.random.choice(range(len(features)), size=SAMPLE_SIZE,
                                    replace=False)  # Randomly select 30 % of samples
         projected_features = TSNE(n_components=2, random_state=0).fit_transform(
             features[indices])
-        print(projected_features.shape)
         my_id = 0
-        print(projected_features[(labels[indices] == my_id).values])
+
         for category, category_id in sorted(category_to_id.items()):
             points = projected_features[(
                 labels[indices] == category_id).values]
@@ -98,8 +96,7 @@ def convert_data_to_csv():
                 entries.append((model_name, fold_idx, accuracy))
             cv_df = pd.DataFrame(
                 entries, columns=['model_name', 'fold_idx', 'accuracy'])
-        print("accuracy")
-        print(cv_df.groupby('model_name').accuracy.mean())
+
         model = LogisticRegression(random_state=0)
 
         # Split Data
@@ -110,9 +107,60 @@ def convert_data_to_csv():
         # Train Algorithm
         model.fit(X_train, y_train)
 
+
         # Make Predictions
         y_pred_proba = model.predict_proba(X_test)
         y_pred = model.predict(X_test)
+        filename = 'finalized_model.sav'
+        pickle.dump(model, open(filename, 'wb'))
+
+def retrainModel(docs):
+    filename = 'finalized_model.sav'
+    model = pickle.load(open(filename, 'rb'))
+    docs['category_id'] = docs['category'].factorize()[0]
+    category_id_df = docs[['category', 'category_id']
+                        ].drop_duplicates().sort_values('category_id')
+    category_to_id = dict(category_id_df.values)
+    id_to_category = dict(category_id_df[['category_id', 'category']].values)
+    docs.groupby('category').category_id.count()
+    tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5, norm='l2', encoding='latin-1', ngram_range=(1, 2),
+                            stop_words='english')
+
+    features = tfidf.fit_transform(docs.description.values.astype('U')).toarray()
+    labels = docs.category_id
+    N = 3
+    for Category, category_id in sorted(category_to_id.items()):
+        features_chi2 = chi2(features, labels == category_id)
+        indices = np.argsort(features_chi2[0])
+        feature_names = np.array(tfidf.get_feature_names())[indices]
+        unigrams = [v for v in feature_names if len(v.split(' ')) == 1]
+        bigrams = [v for v in feature_names if len(v.split(' ')) == 2]
+        SAMPLE_SIZE = int(len(features) * 0.3)
+        np.random.seed(0)
+        indices = np.random.choice(range(len(features)), size=SAMPLE_SIZE,
+                                   replace=False)  # Randomly select 30 % of samples
+        projected_features = TSNE(n_components=2, random_state=0).fit_transform(
+            features[indices])
+        my_id = 0
+        for category, category_id in sorted(category_to_id.items()):
+            points = projected_features[(
+                labels[indices] == category_id).values]
+        models = [
+            RandomForestClassifier(
+                n_estimators=200, max_depth=100, random_state=0),
+            MultinomialNB(),
+            LogisticRegression(random_state=30),
+        ]
+
+        # Split Data
+        X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(features, labels, docs.index,
+                                                                                         test_size=0.33,
+                                                                                         random_state=42)
+
+
+
+        # Make Predictions
+        y_pred = model.partial_fit(X_test)
 
         N = 5
         for Category, category_id in sorted(category_to_id.items()):
@@ -123,11 +171,9 @@ def convert_data_to_csv():
                 feature_names) if len(v.split(' ')) == 1][:N]
             bigrams = [v for v in reversed(
                 feature_names) if len(v.split(' ')) == 2][:N]
-            print("# '{}':".format(Category))
-            print("  . Top unigrams:\n       . {}".format(
-                '\n       . '.join(unigrams)))
-            print("  . Top bigrams:\n       . {}".format(
-                '\n       . '.join(bigrams)))
+            #print("# '{}':".format(Category))
+            #print("  . Top unigrams:\n       . {}".format('\n       . '.join(unigrams)))
+            #print("  . Top bigrams:\n       . {}".format('\n       . '.join(bigrams)))
             test_features = tfidf.transform(docs.description.tolist())
 
             Y_pred = model.predict(test_features)
@@ -145,14 +191,13 @@ def convert_data_to_csv():
 
 
 if __name__ == "__main__":
-    convert_data_to_csv()
+    docs=convert_data_to_csv()
+    trainModel()
+    retrainModel( docs)
 
 
-def retrain():
-    # get data from api
-    # clean it
-    # retrain the model with partial fit
-    # save the model locally
+
 
 
 def predict():
+    print("end")

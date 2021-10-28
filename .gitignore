@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#data
+news_data.csv
+predictions.csv
+.sendNews.py.swp

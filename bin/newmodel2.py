@@ -38,7 +38,7 @@ def convert_data_to_csv():
     docs.drop_duplicates(subset="_id")
     docs.to_csv("news_data.csv", ",")
     csv_export = docs.to_csv(sep=",")
-    #print("\nCSV data:***********************", csv_export)
+    # print("\nCSV data:***********************", csv_export)
     df = pd.read_csv("TrainData.csv")
     df.fillna(0)
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -151,8 +151,27 @@ if __name__ == "__main__":
 def retrain():
     # get data from api
     # clean it
+    try:
+        conn = MongoClient('mongodb://root:example@localhost:27017', 27017)
+        # print("connected sucessfully")
+    except:
+        print("could not connect to mongodb")
+        return
+
+    db = conn.database
+    users = db.users
+    cursor = users.find()
+    mongo_docs = list(cursor)
+    # print(mongo_docs)
+    docs = pd.DataFrame(columns=[])
+    for num, doc in enumerate(mongo_docs):
+        doc["_id"] = str(doc["_id"])
+        doc_id = doc["_id"]
+        series_obj = pd.Series(doc, name=doc_id)
+        docs = docs.append(series_obj)
+    docs.drop_duplicates(subset="_id")
     # retrain the model with partial fit
+    # model.partial_fit(docs)
     # save the model locally
-
-
-def predict():
+    # model.save()
+    pass

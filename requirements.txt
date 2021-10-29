@@ -4,3 +4,11 @@ newsapi-python
 pymongo
 http
 urllib
+sklearn
+pydantic
+uvicorn
+typing
+datetime
+fastapi
+joblib
+re

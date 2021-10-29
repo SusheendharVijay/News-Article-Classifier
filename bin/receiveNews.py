@@ -11,7 +11,6 @@ import socket
 from confluent_kafka import Consumer, KafkaError, KafkaException
 from pymongo import MongoClient
 
-  
 
 def msg_process(msg):
 
@@ -44,7 +43,6 @@ def msg_process(msg):
     # rec_id2 = users.insert_one(emp_rec2)
     # print("Data inserted with record ids", rec_id1, " ", rec_id2)
     news_rec = {
-        "source": dmsg['source'],
         "description": dmsg['description'],
         "title": dmsg["title"],
         "category": dmsg["category"]

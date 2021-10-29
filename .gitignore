@@ -132,3 +132,6 @@ dmypy.json
 news_data.csv
 predictions.csv
 .sendNews.py.swp
+
+#notebooks
+*.ipynb

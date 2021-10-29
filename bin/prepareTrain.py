@@ -28,7 +28,14 @@ def get_mediastack(category, offset):
         articles = list(
             filter(
                 lambda article: True if article["language"] == 'en' else False, articles))
+        articles = map(lambda article: {
+            'title': article["title"],
+            "category": article["category"],
+
+            "description": article["description"]
+        }, articles)
         return pd.DataFrame(articles)
+
     except Exception as e:
         print(e)
 
@@ -38,7 +45,7 @@ def combine_cat_data():
     data = None
     categories = ["general", 'technology', 'business',
                   'science', 'sports', 'health', 'entertainment']
-    for offset in [0, 100, 200, 300, 400, 500, 600, 700]:
+    for offset in [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
         print(offset)
         for category in categories:
             articles_data = get_mediastack(category, offset)

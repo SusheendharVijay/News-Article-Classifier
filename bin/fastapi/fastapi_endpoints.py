@@ -42,7 +42,11 @@ def ping():
 # Payload: QueryIn containing the parameters
 # Response: QueryOut containing the news_category predicted (200)
 def predict_category(query_data: QueryIn):
-    output = {"new_category": predict(query_data), "timestamp": datetime.now()}
+    output = {
+        "news_category": predict(query_data),
+        "timestamp": datetime.now()
+    }
+    print(output)
     return output
 
 

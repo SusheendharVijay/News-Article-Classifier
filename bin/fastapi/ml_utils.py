@@ -120,7 +120,27 @@ def train():
 
 def predict(query_data):
     print(query_data)
-    return "OK"
+    news = pd.DataFrame(
+        [[query_data.title, query_data.description]], columns=['title', 'description'])
+
+    vec1 = joblib.load("vec1.sav")
+    vec2 = joblib.load("vec2.sav")
+    loaded_model = joblib.load("model.sav")
+
+    print(news.head())
+    for col in ['title', 'description']:
+        news[col] = [normalize_text(s) for s in news[col]]
+
+    # pull the data into vectors
+    x1 = vec1.transform(news['title'])
+    x2 = vec2.transform(news['description'])
+
+    X = np.concatenate((x1.toarray(), x2.toarray()), axis=1)
+    prediction = loaded_model.predict(X)
+    encoder = joblib.load('encoder.sav')
+    category = encoder.inverse_transform(prediction)
+    print("Prediction", category[0])
+    return category[0]
 
 
 # train()

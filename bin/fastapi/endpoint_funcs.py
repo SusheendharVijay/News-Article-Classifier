@@ -18,7 +18,6 @@ from sklearn.manifold import TSNE
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import SGDClassifier
 import joblib
-from sklearn.utils.extmath import log_logistic
 
 # define the class encodings and reverse encodings
 classes = {'general': 0}  # modify this later
@@ -42,32 +41,11 @@ def predict(query_data):
 
 
 def retrain():
-    # get data from api
-    # clean it
-    # try:
-    #     conn = MongoClient('mongodb://root:example@localhost:27017', 27017)
-    #     # print("connected sucessfully")
-    # except:
-    #     print("could not connect to mongodb")
-    #     return
-
-    # db = conn.database
-    # users = db.users
-    # cursor = users.find()
-    # mongo_live_data = list(cursor)
-    # # print(mongo_live_data)
-    # live_data = pd.DataFrame(columns=[])
-    # for num, doc in enumerate(mongo_live_data):
-    #     doc["_id"] = str(doc["_id"])
-    #     doc_id = doc["_id"]
-    #     series_obj = pd.Series(doc, name=doc_id)
-    #     live_data = live_data.append(series_obj)
-    # live_data.drop_duplicates(subset="_id", inplace=True)
     live_data = get_mongo_data()
     live_data.to_csv("live_data.csv", index=False)
     X, y = prepare_data(live_data)
     loaded_model = joblib.load("model.sav")
-    loaded_model.fit(X, y)
+    loaded_model.partial_fit(X, y)
     print("trained successfully")
 
     # save the model locally
@@ -102,7 +80,7 @@ def train(clf=SGDClassifier(random_state=42)):
     X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                         test_size=0.33,
                                                         random_state=42)
-    clf.fit(X_train, y_train)
+    clf.partial_fit(X_train, y_train, classes=np.unique(y))
     y_pred = clf.predict(X_test)
     score = f1_score(y_test, y_pred, average='macro')
     print("Trained with an accuracy:{}".format(score))
@@ -129,6 +107,7 @@ def get_mongo_data():
     users = db.users
     cursor = users.find()
     live_data = pd.DataFrame(list(cursor))
+    live_data = live_data.iloc[:300, :]
     live_data.drop_duplicates(subset=["_id"], inplace=True)
     return live_data.drop(["_id"], axis=1)
 

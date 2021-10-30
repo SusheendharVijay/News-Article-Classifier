@@ -1,0 +1,29 @@
+.inter {
+  background-color: white;
+  border-radius: 2%;
+  border: 1px solid white;
+  padding: 4rem;
+  color: black;
+  text-align: left;
+}
+
+.fields {
+  display: flex;
+  align-items: space-between;
+  flex-direction: column;
+}
+
+.fields label {
+  font-size: 1.5rem;
+}
+
+.fields input {
+  background-color: rgba(231, 229, 229, 0.863);
+  border-radius: 5px;
+  border: rgba(231, 229, 229, 0.863);
+  height: 50px;
+}
+
+.card {
+  padding: 40px;
+}

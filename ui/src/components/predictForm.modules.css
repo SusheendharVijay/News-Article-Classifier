@@ -2,9 +2,12 @@
   background-color: white;
   border-radius: 2%;
   border: 1px solid white;
-  padding: 4rem;
+  padding: 2rem;
   color: black;
   text-align: left;
+  width: 800px;
+  height: 50%;
+  box-sizing: border-box;
 }
 
 .fields {
@@ -21,9 +24,25 @@
   background-color: rgba(231, 229, 229, 0.863);
   border-radius: 5px;
   border: rgba(231, 229, 229, 0.863);
-  height: 50px;
+  height: 75px;
+  width: 700px;
+  size: 40px;
+  font-size: 20px;
+  text-align: justify;
+  padding-right: 20px;
 }
 
-.card {
-  padding: 40px;
+.fields button {
+  width: 150px;
+  margin-top: 20px;
+  align-items: flex-end;
+  background-color: rgba(231, 229, 229, 0.863);
+  border-radius: 5px;
+  border: none;
+  padding: 10px;
+  font-size: 20px;
 }
+
+/* .card {
+  padding: 40px;
+} */

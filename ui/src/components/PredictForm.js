@@ -4,6 +4,7 @@ import "./predictForm.modules.css";
 const PredictForm = (props) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [trainStatus, setTrainStatus] = useState("");
 
   const onSubmitHandler = (event) => {
     event.preventDefault();
@@ -11,6 +12,21 @@ const PredictForm = (props) => {
       title: title,
       description: description,
     });
+  };
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  const retrainModel = async () => {
+    setTrainStatus("Retraining the model!");
+    const response = await fetch("/retrain_model");
+    const data = await response.json();
+    setTrainStatus("Retraining complete!");
+    await sleep(150);
+    setTrainStatus("");
+
+    console.log(data);
   };
 
   return (
@@ -24,7 +40,10 @@ const PredictForm = (props) => {
             type="text"
             id="fname"
             name="fname"
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              props.onReset();
+              setTitle(e.target.value);
+            }}
           />
           <br />
           <label for="lname">Description: </label>
@@ -34,10 +53,20 @@ const PredictForm = (props) => {
             type="text"
             id="lname"
             name="lname"
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              props.onReset();
+              setDescription(e.target.value);
+            }}
           />
           <button type="submit">Get Prediction</button>
-          <button type="button">Retrain Model</button>
+          <button type="button" onClick={retrainModel}>
+            Retrain Model
+          </button>
+          {trainStatus !== "" && (
+            <p style={{ color: "black", width: "200px", fontSize: "20px" }}>
+              {trainStatus}
+            </p>
+          )}
         </div>
       </form>
     </div>

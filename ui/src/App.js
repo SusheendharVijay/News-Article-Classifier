@@ -1,44 +1,37 @@
-// import fetch from "fetch";
-import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PredictForm from "./components/PredictForm";
 import Card from "./components/Card";
 import "./App.css";
 function App() {
   const [payload, setPayload] = useState({ title: "", description: "" });
+  const [prediction, setPrediction] = useState("");
 
   const SubmitHandler = (newPayload) => {
     setPayload(newPayload);
   };
-  const getPrediction = async () => {
-    const Url = "http://localhost:8000/ping";
-    // const params = {
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(payload),
-    //   method: "post",
-    // };
+  const getPrediction = useCallback(async () => {
+    const params = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      method: "post",
+    };
 
-    // const response = await fetch("ping", {
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Accept: "application/json",
-    //     method: "GET",
-    //   },
-    // });
-    // const data = await response.json();
-    // console.log(data);
-    // const response = await fetch("/ping");
-    // const data = await response.json();
-    // console.log(data);
+    const response = await fetch("/predict_category", params);
+    const data = await response.json();
+    if (payload.title !== "" && payload.description !== "") {
+      setPrediction(data.news_category);
+    }
+  }, [payload]);
 
-    const response = await axios.get(Url);
-  };
+  // const resetPrediction = () => {
+  //   setPrediction("");
+  // };
 
   useEffect(() => {
     getPrediction();
-  }, [payload]);
+  }, [payload, getPrediction]);
   return (
     <div className="App">
       <div className="heading">
@@ -46,10 +39,14 @@ function App() {
       </div>
       <header className="App-header">
         <Card>
-          <PredictForm onSubmit={SubmitHandler} />
+          <PredictForm onSubmit={SubmitHandler} onReset={setPrediction} />
         </Card>
-
-        <p>{}</p>
+        <div style={{ margin: "20px" }}></div>
+        <Card>
+          <p style={{ color: "black", width: "200px", fontSize: "20px" }}>
+            Prediction : {prediction}
+          </p>
+        </Card>
       </header>
     </div>
   );

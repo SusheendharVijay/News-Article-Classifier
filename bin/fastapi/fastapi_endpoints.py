@@ -60,6 +60,6 @@ def retrain_model():
 
 # Main function to start the app when fastapi_endpoints.py is called
 if __name__ == "__main__":
-    # Uvicorn is used to run the server and listen for incoming API requests on 0.0.0.0:8888
+    # Uvicorn is used to run the server and listen for incoming API requests on 0.0.0.0:8000
     uvicorn.run("fastapi_endpoints:app",
                 host="0.0.0.0", port=8000, reload=True)

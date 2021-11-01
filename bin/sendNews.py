@@ -50,7 +50,7 @@ def main():
             data = combine_cat_data()
 
             print("API time break.....")
-            time.sleep(10)  # temp change
+
             for article in data:
                 payload = {
                     'title': article["title"],
@@ -62,6 +62,7 @@ def main():
                                  value=payload, callback=acked)
 
             producer.flush()
+            time.sleep(90)  # temp change
 
         except Exception as e:
             if e == TypeError:

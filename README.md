@@ -16,4 +16,3 @@ End-to-end pipeline for News article topic classification
 - In a new terminal run `python bin/sendNews.py send_stream` (Kafka Producer)
 - In a new terminal navigate to `bin/fastapi directory`. Run `python fastapi_endpoints.py` (FastAPI endpoints)
 - Navigate to the UI folder, and run `npm start` to start the react application.
-- Use the application for all your News Article Classification needs.
